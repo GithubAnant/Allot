@@ -1,0 +1,113 @@
+import {parseTimestampMs,tokenCount} from "./core";
+
+
+
+
+
+
+// Claude Code uses this model for local placeholders that never reached the API.
+export const CLAUDE_SYNTHETIC_MODEL = "<synthetic>";
+
+/**
+ * Claude Code repeats a message's `dedupeKey` for each assistant content block.
+ * Subagent blocks can progress from stream-start to final usage, so callers
+ * must count each key once using the maximum of each token channel.
+ */
+export function parseClaudeLine(line: string): readonly UsageRecord[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(line);
+  } catch {
+    return [];
+  }
+  return parseClaudeRecord(parsed);
+}
+
+function cacheCreation1h(usage: Record<string, unknown>): { cacheCreation1hTokens?: number } {
+  const split = usage["cache_creation"];
+  if (typeof split !== "object" || split === null) return {};
+  const tokens = tokenCount((split as Record<string, unknown>)["ephemeral_1h_input_tokens"]);
+  return tokens > 0 ? { cacheCreation1hTokens: tokens } : {};
+}
+
+function parseClaudeRecord(parsed: unknown): readonly UsageRecord[] {
+  if (typeof parsed !== "object" || parsed === null) return [];
+
+  const record = parsed as Record<string, unknown>;
+  if (record["type"] !== "assistant") return [];
+
+  const message = record["message"];
+  if (typeof message !== "object" || message === null) return [];
+  const messageRecord = message as Record<string, unknown>;
+
+  const usage = messageRecord["usage"];
+  if (typeof usage !== "object" || usage === null) return [];
+  const usageRecord = usage as Record<string, unknown>;
+
+  const timestampMs = parseTimestampMs(record["timestamp"]);
+  if (timestampMs === null) return [];
+
+  const model = typeof messageRecord["model"] === "string" ? messageRecord["model"] : "";
+  if (model.length === 0 || model === CLAUDE_SYNTHETIC_MODEL) return [];
+
+  const messageId = typeof messageRecord["id"] === "string" ? messageRecord["id"] : null;
+  const requestId = typeof record["requestId"] === "string" ? record["requestId"] : null;
+  const dedupeKey =
+    messageId === null && requestId === null ? null : `${messageId ?? ""}:${requestId ?? ""}`;
+
+  const cost = record["costUSD"];
+
+  const executor: UsageRecord = {
+    provider: "claude",
+    timestampMs,
+    model,
+    sessionId: typeof record["sessionId"] === "string" ? record["sessionId"] : "",
+    totals: {
+      uncachedInputTokens: tokenCount(usageRecord["input_tokens"]),
+      cachedInputTokens: tokenCount(usageRecord["cache_read_input_tokens"]),
+      cacheCreationTokens: tokenCount(usageRecord["cache_creation_input_tokens"]),
+      outputTokens: tokenCount(usageRecord["output_tokens"]),
+      // Anthropic folds thinking tokens into output and does not break them out.
+      reasoningTokens: 0,
+    },
+    ...cacheCreation1h(usageRecord),
+    reportedCostUsd: typeof cost === "number" && Number.isFinite(cost) ? cost : null,
+    speed: usageRecord["speed"] === "fast" ? "fast" : "standard",
+    dedupeKey,
+  };
+
+  // Top-level `usage` is the executor's alone. Advisor calls run on another model at its own rates
+  // and appear only in `iterations`, so each one is its own record under that model.
+  const records = [executor];
+  const iterations: readonly unknown[] = Array.isArray(usageRecord["iterations"])
+    ? usageRecord["iterations"]
+    : [];
+  for (const [index, iteration] of iterations.entries()) {
+    if (typeof iteration !== "object" || iteration === null) continue;
+    const advisor = iteration as Record<string, unknown>;
+    if (advisor["type"] !== "advisor_message") continue;
+
+    const advisorModel = typeof advisor["model"] === "string" ? advisor["model"] : "";
+    if (advisorModel.length === 0 || advisorModel === CLAUDE_SYNTHETIC_MODEL) continue;
+
+    records.push({
+      provider: "claude",
+      timestampMs,
+      model: advisorModel,
+      sessionId: executor.sessionId,
+      totals: {
+        uncachedInputTokens: tokenCount(advisor["input_tokens"]),
+        cachedInputTokens: tokenCount(advisor["cache_read_input_tokens"]),
+        cacheCreationTokens: tokenCount(advisor["cache_creation_input_tokens"]),
+        outputTokens: tokenCount(advisor["output_tokens"]),
+        reasoningTokens: 0,
+      },
+      ...cacheCreation1h(advisor),
+      reportedCostUsd: null,
+      speed: executor.speed,
+      dedupeKey: dedupeKey === null ? null : `${dedupeKey}:advisor:${index}`,
+    });
+  }
+  return records;
+}
+

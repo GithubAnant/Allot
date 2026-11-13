@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a problem with usage, providers, or the native panel.
+body:
+  - type: markdown
+    attributes:
+      value: "Never include tokens, email addresses, transcripts, or real billing details. Redact logs and screenshots."
+  - type: input
+    id: version
+    attributes:
+      label: App version or commit
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: macOS version and processor
+      placeholder: macOS 15, Apple Silicon
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Affected provider
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include steps to reproduce, expected behavior, and actual behavior.
+    validations:
+      required: true

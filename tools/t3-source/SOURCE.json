@@ -1,0 +1,14 @@
+{
+  "repository": "https://github.com/pingdotgg/t3code",
+  "revision": "60f70d98cdeb2c692db649b9ade3adf74dd62bf9",
+  "files": {
+    "packages/provider-core/src/server/usage.ts": "b348da1d2ccf248b58033c9119fb26b1661b15daf1c3fb063d2050248cec0685",
+    "apps/server/src/usage/usagePricing.ts": "2f18ebbc5efa1c222a85805088a5e714e1e15acf17b5b0d498dcf936731fad6c",
+    "apps/server/src/usage/usageAggregation.ts": "4b6387d5c093fb03baab66f6924b411b533976e0e9e0fa921f0b8bbeccc837ef",
+    "packages/shared/src/usageMerge.ts": "68f3d0ca788446d306b0b083db78c5b9a4965a2971ad62710a90f7c1636e543b",
+    "packages/shared/src/usageLimits.ts": "6f3ee059252049c9de6b3b8ec2918f1ef8a0baf8d1d57ca69cc65767aae12cf2",
+    "apps/server/src/provider/Drivers/claudeUsage.ts": "e443f970d5af80b421e298690de88c1db113f9e9e7ac1f45016e4fa17cd0e834",
+    "apps/server/src/provider/Drivers/codexUsage.ts": "2c58d8d5669268d7daab0e6acbf0df95f3143712f89836301adbb67958d63dda",
+    "packages/provider-cursor/src/server/accountCache.ts": "6144f1cef06d37600bfa9f982b13fb2eea6170da6a8d3d7594970e99f044ad0a"
+  }
+}

@@ -1,0 +1,21 @@
+.build/
+.protocol/
+.firecrawl/
+dist/
+.DS_Store
+
+.vendor/
+
+.reference/
+tools/node_modules/
+
+# Local history, private screenshots, credentials, and build artifacts
+archive/
+docs/panel*.png
+docs/build-receipt.json
+.env
+.env.*
+*.log
+*.app/
+*.dSYM/
+.swiftpm/
