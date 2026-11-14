@@ -1,0 +1,5 @@
+{
+  "source": "https://raw.githubusercontent.com/BerriAI/litellm/ac1cc5111cb26700710a4aafaef18df897634e16/model_prices_and_context_window.json",
+  "license": "MIT",
+  "purpose": "Offline API-equivalent estimates; unknown models stay unpriced."
+}

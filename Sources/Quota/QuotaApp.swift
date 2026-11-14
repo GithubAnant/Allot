@@ -14,6 +14,7 @@ import CoreText
     private let store = T3Store()
     private var item: NSStatusItem!
     private let popover = NSPopover()
+    private var accountsWindow: NSWindow?
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let font = QuotaResources.bundle.url(forResource: "Geist-Regular", withExtension: "ttf") { CTFontManagerRegisterFontsForURL(font as CFURL, .process, nil) }
         let arguments = ProcessInfo.processInfo.arguments
@@ -45,13 +46,25 @@ import CoreText
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.image = AllotMark.menuBarImage()
         item.button?.target = self; item.button?.action = #selector(toggle)
-        item.button?.toolTip = "Allot · T3 usage"
+        item.button?.toolTip = L.text("Allot · AI usage")
+        item.button?.setAccessibilityLabel(L.text("Allot · AI usage"))
         popover.behavior = .transient; popover.animates = false
-        let controller = NSHostingController(rootView: PanelView(store: store, close: { [weak self] in self?.popover.performClose(nil) }))
+        let controller = NSHostingController(rootView: PanelView(store: store, close: { [weak self] in self?.popover.performClose(nil) }, manageAccounts: { [weak self] in self?.showAccounts() }))
         controller.sizingOptions = [.preferredContentSize]; popover.contentViewController = controller
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(wake), name: NSWorkspace.didWakeNotification, object: nil)
         store.start()
         if arguments.contains("--show") || !UserDefaults.standard.bool(forKey: "t3-port-launched") { UserDefaults.standard.set(true, forKey: "t3-port-launched"); toggle() }
+    }
+    private func showAccounts() {
+        popover.performClose(nil)
+        if accountsWindow == nil {
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 420, height: 500), styleMask: [.titled, .closable], backing: .buffered, defer: false)
+            window.title = L.text("Accounts"); window.isReleasedWhenClosed = false
+            window.contentView = NSHostingView(rootView: AccountsView(store: store))
+            window.center(); accountsWindow = window
+        }
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        accountsWindow?.makeKeyAndOrderFront(nil)
     }
     @objc private func toggle() {
         if popover.isShown { popover.performClose(nil); return }

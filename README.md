@@ -20,7 +20,7 @@ AI usage, one click from your Mac’s menu bar.
 - **Cost** — API-equivalent estimates, down to each model.
 - **Tokens** — usage across providers and accounts.
 
-Native, compact and dark. Refreshes automatically. Uses your existing Codex, Claude Code and T3 sign-ins for Cursor.
+Native, compact and dark. Refreshes automatically. Multiple Claude and Codex accounts. Automatic macOS language detection. No T3 installation needed.
 
 <table>
 <tr>
@@ -42,7 +42,7 @@ cd Allot
 open dist/Allot.app
 ```
 
-Move the app to `~/Applications` to keep it installed.
+Move the app to `~/Applications` to keep it installed. Sharing a build? [Install and connect accounts →](docs/INSTALL.md)
 
 Cost is an estimate, not your subscription bill. Cursor cost/token history follows T3’s last sync. Builds are ad-hoc signed, not notarized. [Coverage and limitations →](docs/DETAILS.md)
 

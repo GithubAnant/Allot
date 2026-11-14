@@ -9,6 +9,9 @@ final class DocumentationScreenshots: XCTestCase {
         guard let destination = ProcessInfo.processInfo.environment["QUOTA_SCREENSHOT_DIRECTORY"] else {
             throw XCTSkip("Set QUOTA_SCREENSHOT_DIRECTORY to render documentation fixtures.")
         }
+        if let language = ProcessInfo.processInfo.environment["ALLOT_SCREENSHOT_LANGUAGE"] {
+            UserDefaults.standard.setVolatileDomain(["AppleLanguages": [language], "AppleLocale": language], forName: UserDefaults.argumentDomain)
+        }
         _ = NSApplication.shared
         if let font = QuotaResources.bundle.url(forResource: "Geist-Regular", withExtension: "ttf") {
             CTFontManagerRegisterFontsForURL(font as CFURL, .process, nil)
@@ -30,6 +33,22 @@ final class DocumentationScreenshots: XCTestCase {
             T3Pool(driver: "claudeAgent", windows: [window("seven_day", "Weekly", 72, 148, 76), window("seven_day_opus", "Weekly · Opus", 61, 148, 76)]),
             T3Pool(driver: "cursor", windows: [window("autoPercentUsed", "Cursor Models", 93, 477, 69, description: "Grok, Composer, and Auto use this allowance."), window("apiPercentUsed", "Other Models", 0, 477, 69)])
         ]
+        if ProcessInfo.processInfo.environment["ALLOT_SCREENSHOT_ACCOUNTS"] == "3" {
+            for p in store.pools.indices where store.pools[p].driver != "cursor" {
+                for w in store.pools[p].windows.indices {
+                    let original = store.pools[p].windows[w].segments[0]!
+                    store.pools[p].windows[w].segments = ["Personal", "Work", "Studio"].enumerated().map { index, name in
+                        var segment = original
+                        segment.key = name; segment.name = name
+                        segment.remaining = max(0, original.remaining - Double(index * 14))
+                        segment.used = 100 - segment.remaining; segment.refill = segment.used
+                        return segment
+                    }
+                    let segments = store.pools[p].windows[w].segments.compactMap { $0 }
+                    store.pools[p].windows[w].remaining = (segments.reduce(0) { $0 + $1.remaining } / Double(segments.count)).rounded()
+                }
+            }
+        }
         let cost = 138.42, tokens = 12_800_000.0
         store.summary = T3Summary(costUsd: cost, totalTokens: tokens, records: 1200, sessions: 45, providers: [
             T3ProviderTotals(provider: "codex", costUsd: 55.4, totalTokens: 4_200_000, records: 400, sessions: 14, costShare: 55.4 / cost, tokenShare: 4_200_000 / tokens),
@@ -47,11 +66,25 @@ final class DocumentationScreenshots: XCTestCase {
             let window = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: 400, height: 700), styleMask: .borderless, backing: .buffered, defer: false)
             window.contentView = host
             host.frame = NSRect(origin: .zero, size: host.fittingSize)
+            XCTAssertEqual(host.frame.width, 400)
+            XCTAssertLessThanOrEqual(host.frame.height, 740)
             host.layoutSubtreeIfNeeded(); window.display()
             let bitmap = try XCTUnwrap(host.bitmapImageRepForCachingDisplay(in: host.bounds))
             host.cacheDisplay(in: host.bounds, to: bitmap)
             let png = try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
             try png.write(to: directory.appendingPathComponent(metric.rawValue.lowercased() + ".png"))
         }
+        store.accounts = [T3Provider.codex, .claude].flatMap { provider in
+            ["Personal", "Work", "Studio"].map { name in T3Account(id: provider.rawValue + name, provider: provider, name: name) }
+        }
+        let accountsHost = NSHostingView(rootView: AccountsView(store: store))
+        let accountsWindow = NSWindow(contentRect: NSRect(x: -10000, y: -10000, width: 420, height: 500), styleMask: .borderless, backing: .buffered, defer: false)
+        accountsWindow.contentView = accountsHost
+        accountsHost.frame = NSRect(origin: .zero, size: accountsHost.fittingSize)
+        accountsHost.layoutSubtreeIfNeeded(); accountsWindow.display()
+        XCTAssertEqual(accountsHost.frame.size, NSSize(width: 420, height: 500))
+        let accountsBitmap = try XCTUnwrap(accountsHost.bitmapImageRepForCachingDisplay(in: accountsHost.bounds))
+        accountsHost.cacheDisplay(in: accountsHost.bounds, to: accountsBitmap)
+        try XCTUnwrap(accountsBitmap.representation(using: .png, properties: [:])).write(to: directory.appendingPathComponent("accounts.png"))
     }
 }

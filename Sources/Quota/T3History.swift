@@ -6,6 +6,7 @@ actor T3History {
     private var latest: Date?
     private var engine: T3Engine?
     private var cacheSignature: String?
+    private var bundledRates: [String: Any]?
     init(source: T3Source) { self.source = source }
     func summary(days: Int, provider: String? = nil, scan: Bool = false) throws -> (T3Summary, Date?, [String]) {
         let engine = try self.engine ?? T3Engine()
@@ -30,7 +31,7 @@ actor T3History {
         }
         if scan {
             let cutoff = Date().addingTimeInterval(-Double(days + 2) * 86400).timeIntervalSince1970 * 1000
-            let userHome = FileManager.default.homeDirectoryForCurrentUser
+            let userHome = source.homeDirectory
             var roots: [(String, URL)] = [("codex", userHome.appendingPathComponent(".codex/sessions")), ("codex", userHome.appendingPathComponent(".codex/archived_sessions")), ("claude", userHome.appendingPathComponent(".claude/projects"))]
             for account in source.accounts() {
                 if let home = account.home, [T3Provider.codex, .claude].contains(account.provider) {
@@ -61,10 +62,13 @@ actor T3History {
         }
         let settings = source.settings()
         let ratesURL = root.appendingPathComponent("usage-model-rates.json")
-        let document = (try? Data(contentsOf: ratesURL)).flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }?["document"] ?? [:]
+        if bundledRates == nil { bundledRates = QuotaResources.bundle.url(forResource: "ModelRates", withExtension: "json")
+            .flatMap { try? Data(contentsOf: $0) }.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] } ?? [:] }
+        let importedRates = (try? Data(contentsOf: ratesURL)).flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }?["document"] as? [String: Any] ?? [:]
+        let document = (bundledRates ?? [:]).merging(importedRates) { _, imported in imported }
         let cursorURL = root.appendingPathComponent("usage-cursor-account-cache-v1.json")
         let cursor = (try? Data(contentsOf: cursorURL)).flatMap { try? JSONSerialization.jsonObject(with: $0) } ?? NSNull()
-        guard !files.isEmpty || !(cursor is NSNull) else { throw UsageFailure("No T3 usage history found on this Mac.") }
+        guard !files.isEmpty || !(cursor is NSNull) else { throw UsageFailure("No usage history found on this Mac.") }
         let now = Date(), calendar = Calendar.current
         let start = days == 1 ? now.addingTimeInterval(-86400) : calendar.date(byAdding: .day, value: -(days - 1), to: calendar.startOfDay(for: now))!
         let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_CA"); formatter.dateFormat = "yyyy-MM-dd"
@@ -74,7 +78,7 @@ actor T3History {
         if days == 1 { input["sinceTimeMs"] = start.timeIntervalSince1970 * 1000 }
         if let provider { input["provider"] = provider }
         let data = try engine.call("summaryJSON", object: input)
-        return (try JSONDecoder().decode(T3Summary.self, from: data), latest, Array(Set(notices)))
+        return (try JSONDecoder().decode(T3Summary.self, from: data), latest ?? Date(), Array(Set(notices)))
     }
     nonisolated static func projectedLines(path: String, provider: String) throws -> [String] {
         let handle = try FileHandle(forReadingFrom: URL(fileURLWithPath: path))

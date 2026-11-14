@@ -24,7 +24,7 @@ final class T3Store {
         self.source = source; history = T3History(source: source)
         accounts = source.accounts()
         if let data = UserDefaults.standard.data(forKey: "t3-port-summary"), let cached = try? JSONDecoder().decode(T3Summary.self, from: data) { summary = cached }
-        if let data = UserDefaults.standard.data(forKey: "t3-port-limits"), let cached = try? JSONDecoder().decode([String: T3LimitAccount].self, from: data) { limitAccounts = cached; rebuildPools() }
+        if let data = UserDefaults.standard.data(forKey: "t3-port-limits"), let cached = try? JSONDecoder().decode([String: T3LimitAccount].self, from: data) { limitAccounts = cached.filter { id, _ in accounts.contains { $0.id == id } }; rebuildPools() }
     }
     func start() {
         timer?.cancel()
@@ -51,6 +51,7 @@ final class T3Store {
                 }
             }
             for await (id, result) in group {
+                guard accounts.contains(where: { $0.id == id }) else { continue }
                 switch result {
                 case .success(let snapshot): limitAccounts[id] = snapshot; errors[id] = nil
                 case .failure(let error): errors[id] = (error as? UsageFailure)?.message ?? "Could not read limits."
@@ -76,6 +77,18 @@ final class T3Store {
     }
     func selectDays(_ value: Int) { days = value; Task { await refreshHistory() } }
     func selectProvider(_ provider: T3Provider?) { selectedProvider = provider; rebuildPools(); Task { await refreshHistory() } }
+    func addAccount(provider: T3Provider, name: String) throws -> T3Account {
+        let account = try source.localAccounts.add(provider: provider, name: name)
+        accounts = source.accounts()
+        return account
+    }
+    func removeAccount(_ account: T3Account) throws {
+        try source.localAccounts.remove(account)
+        accounts = source.accounts(); limitAccounts[account.id] = nil; errors[account.id] = nil
+        rebuildPools()
+        if let data = try? JSONEncoder().encode(limitAccounts) { UserDefaults.standard.set(data, forKey: "t3-port-limits") }
+    }
+    func restoreAccounts() throws { try source.localAccounts.restoreDiscovered(); accounts = source.accounts() }
     private func rebuildPools() {
         do {
             let selected = limitAccounts.values.filter { selectedProvider == nil || T3Provider.from(driver: $0.driver) == selectedProvider }

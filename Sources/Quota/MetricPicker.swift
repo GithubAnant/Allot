@@ -17,8 +17,8 @@ final class MetricControl: NSSegmentedControl {
         cell = MetricCell(textCell: "")
         segmentCount = T3Metric.allCases.count
         for (index, metric) in T3Metric.allCases.enumerated() {
-            setLabel(metric.rawValue, forSegment: index)
-            setToolTip("Show " + metric.rawValue, forSegment: index)
+            setLabel(L.text(metric.rawValue), forSegment: index)
+            setToolTip(L.text(metric.rawValue), forSegment: index)
         }
         trackingMode = .selectOne
         segmentStyle = .rounded
@@ -26,7 +26,7 @@ final class MetricControl: NSSegmentedControl {
         font = NSFont(name: "Geist-Regular", size: 12.1) ?? .systemFont(ofSize: 12.1)
         focusRingType = .none
         target = self; action = #selector(changed)
-        setAccessibilityLabel("Usage metric")
+        setAccessibilityLabel(L.text("Usage metric"))
     }
     required init?(coder: NSCoder) { super.init(coder: coder) }
     @objc private func changed() {

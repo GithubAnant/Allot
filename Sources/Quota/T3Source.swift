@@ -3,6 +3,9 @@ import CryptoKit
 
 struct T3Source: Sendable {
     var directory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".t3/userdata")
+    var localAccounts = LocalAccounts()
+    var cursorDatabase = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Cursor/User/globalStorage/state.vscdb")
+    var homeDirectory = FileManager.default.homeDirectoryForCurrentUser
     func settings() -> [String: Any] {
         guard let data = try? Data(contentsOf: directory.appendingPathComponent("settings.json")), let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return [:] }
         return object
@@ -27,6 +30,13 @@ struct T3Source: Sendable {
             if !instances.values.contains(where: { $0["driver"] as? String == provider.driver }), Command.executable(executable) != nil {
                 result.append(T3Account(id: provider.driver, provider: provider, name: provider.label))
             }
+        }
+        if FileManager.default.fileExists(atPath: cursorDatabase.path), !result.contains(where: { $0.provider == .cursor }) {
+            result.append(T3Account(id: "cursor-local", provider: .cursor, name: "Cursor", configuration: ["localDatabase": cursorDatabase.path]))
+        }
+        if let document = try? localAccounts.load() {
+            result += document.accounts.map { localAccounts.account($0) }
+            result.removeAll { document.hidden.contains($0.id) }
         }
         return result
     }
@@ -115,9 +125,15 @@ struct T3LimitReader: Sendable {
             limits = try Self.codex(data)
         case .claude: limits = try Self.claude(await T3ClaudeProbe.run(account: account))
         case .cursor:
-            let apiKey = try source.cursorKey(instance: account.id)
-            let exchanged = try await T3HTTP.json(URL(string: "https://api2.cursor.sh/auth/exchange_user_api_key")!, token: apiKey, post: true)
-            guard let access = exchanged["accessToken"] as? String else { throw UsageFailure("Cursor sign-in could not be exchanged.") }
+            let access: String
+            if let database = account.configuration["localDatabase"] {
+                access = try await CursorCredentials.token(database: database)
+            } else {
+                let apiKey = try source.cursorKey(instance: account.id)
+                let exchanged = try await T3HTTP.json(URL(string: "https://api2.cursor.sh/auth/exchange_user_api_key")!, token: apiKey, post: true)
+                guard let token = exchanged["accessToken"] as? String else { throw UsageFailure("Cursor sign-in could not be exchanged.") }
+                access = token
+            }
             let body = try await T3HTTP.json(URL(string: "https://api2.cursor.sh/aiserver.v1.DashboardService/GetCurrentPeriodUsage")!, token: access, post: true)
             limits = try Self.cursor(body)
         case .opencode: limits = try await openCode(account)
