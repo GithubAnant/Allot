@@ -1,6 +1,6 @@
-# Allot quota-pie mark
+# Allot usage-curve mark
 
-Selected graph direction **C — Remaining**: a three-quarter disk with its remaining quarter set apart. The bold, monochrome shape stays recognizable at menu-bar size and adapts to the system appearance.
+Selected graph direction **B — Usage curve**: a rounded peak flowing into a flat shelf, with an open scoop beneath it. A bold, monochrome silhouette that adapts to the menu bar’s system appearance.
 
 - `app-icon.png`: 1024px app icon on a dark rounded tile.
 - `mark.png`: 1024px white symbol with transparent background.
