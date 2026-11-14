@@ -184,6 +184,17 @@ final class T3Tests: XCTestCase {
         XCTAssertEqual(try total(engine), 10, "Repeated summaries must not mutate or double-count cached records")
         XCTAssertEqual(try total(T3Engine()), 0, "History must remain private to its engine")
     }
+    @MainActor func testTokenMarkKeepsItsCountersAndMenuBarTemplate() {
+        let path = RationMark.path(in: NSRect(x: 0, y: 0, width: 100, height: 100))
+        XCTAssertTrue(path.contains(NSPoint(x: 10, y: 50)))
+        XCTAssertTrue(path.contains(NSPoint(x: 90, y: 50)))
+        XCTAssertFalse(path.contains(NSPoint(x: 45, y: 65)), "Upper counter stays transparent")
+        XCTAssertFalse(path.contains(NSPoint(x: 40, y: 25)), "Lower cutout stays transparent")
+        XCTAssertFalse(path.contains(NSPoint(x: -1, y: 50)))
+        let menu = RationMark.menuBarImage()
+        XCTAssertTrue(menu.isTemplate)
+        XCTAssertEqual(menu.size, NSSize(width: 18, height: 18))
+    }
     func testTokenFormattingCarriesAndUnknownResetStaysAbsent() {
         XCTAssertEqual(T3Format.tokens(999999), "1M")
         XCTAssertEqual(T3Format.tokens(0), "0")

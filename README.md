@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/branding/app-icon.png" width="96" alt="Ration Token logo">
+
 # Ration
 
 **Know what’s left.**

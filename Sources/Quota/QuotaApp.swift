@@ -43,8 +43,7 @@ import CoreText
             return
         }
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        item.button?.image = NSImage(systemSymbolName: "chart.bar.xaxis", accessibilityDescription: "Ration · T3 usage")
-        item.button?.image?.isTemplate = true
+        item.button?.image = RationMark.menuBarImage()
         item.button?.target = self; item.button?.action = #selector(toggle)
         item.button?.toolTip = "Ration · T3 usage"
         popover.behavior = .transient; popover.animates = false

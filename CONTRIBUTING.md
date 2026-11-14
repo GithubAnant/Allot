@@ -20,3 +20,14 @@ QUOTA_SCREENSHOT_DIRECTORY="$PWD/docs/screenshots" swift test --filter Documenta
 ```
 
 For a PR, describe the user-visible change, how you checked it, and provider/platform limitations. Keep unrelated cleanup separate.
+
+## Logo assets
+
+The selected Token mark is defined once in `Sources/Quota/RationMark.swift`. The menu bar draws this path as a template image; `scripts/AppIcon.swift` renders the same path into the app icon. To regenerate public PNGs:
+
+```sh
+swiftc -O -parse-as-library Sources/Quota/RationMark.swift scripts/AppIcon.swift -o /tmp/ration-render-icon
+/tmp/ration-render-icon /tmp/Ration.iconset docs/branding
+```
+
+The regular app build regenerates its icon without changing tracked documentation assets.

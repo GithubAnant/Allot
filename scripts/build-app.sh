@@ -10,7 +10,8 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" "$staging/Quota.iconset
 cp "$binary_dir/Quota" "$app/Contents/MacOS/Quota"
 ditto "$binary_dir/Quota_Quota.bundle" "$app/Contents/Resources/Quota_Quota.bundle"
 cp docs/T3-LICENSE.txt docs/GEIST-LICENSE.txt docs/PROVIDER-ICONS-LICENSE.txt "$app/Contents/Resources/"
-swift scripts/AppIcon.swift "$staging/Quota.iconset"
+swiftc -O -parse-as-library Sources/Quota/RationMark.swift scripts/AppIcon.swift -o "$staging/render-icon"
+"$staging/render-icon" "$staging/Quota.iconset"
 iconutil -c icns "$staging/Quota.iconset" -o "$app/Contents/Resources/AppIcon.icns"
 cat > "$app/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -22,7 +23,7 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
 <key>CFBundleExecutable</key><string>Quota</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>2.0.0</string>
-<key>CFBundleVersion</key><string>4</string>
+<key>CFBundleVersion</key><string>5</string>
 <key>CFBundleIconFile</key><string>AppIcon</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
