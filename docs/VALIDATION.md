@@ -13,7 +13,7 @@ Run `swift test` on macOS. The correctness suite covers:
 - Cache reuse and preservation of newer locally parsed records.
 - Unicode, invalid UTF-8, malformed JSON, chunk boundaries and partial writes.
 - Native segmented-control action through to a redraw of the number region.
-- Token-mark cutout geometry and the 18-point native menu-bar template.
+- Allot-mark counter and floating-dot geometry and the 18-point native menu-bar template.
 
 Documentation rendering is opt-in. `QUOTA_SCREENSHOT_DIRECTORY="$PWD/docs/screenshots" swift test --filter DocumentationScreenshots` produces all three panel screenshots using synthetic test records. No real accounts, usage files, credentials or provider requests are used by this renderer.
 

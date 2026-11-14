@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 import CoreText
 
-@main struct RationApp {
+@main struct AllotApp {
     @MainActor static func main() {
         let application = NSApplication.shared
         application.setActivationPolicy(.accessory)
@@ -43,9 +43,9 @@ import CoreText
             return
         }
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        item.button?.image = RationMark.menuBarImage()
+        item.button?.image = AllotMark.menuBarImage()
         item.button?.target = self; item.button?.action = #selector(toggle)
-        item.button?.toolTip = "Ration · T3 usage"
+        item.button?.toolTip = "Allot · T3 usage"
         popover.behavior = .transient; popover.animates = false
         let controller = NSHostingController(rootView: PanelView(store: store, close: { [weak self] in self?.popover.performClose(nil) }))
         controller.sizingOptions = [.preferredContentSize]; popover.contentViewController = controller

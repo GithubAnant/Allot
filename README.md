@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/branding/app-icon.png" width="96" alt="Ration Token logo">
+<img src="docs/branding/app-icon.png" width="96" alt="Allot logo">
 
-# Ration
+# Allot
 
 **Know what’s left.**
 
@@ -44,20 +44,20 @@ Built with SwiftUI, AppKit and the usage logic from [T3 Code](https://github.com
 Requires **macOS 14 or newer**, Swift 6 and Xcode command-line tools. The build script produces a universal Apple Silicon / Intel app.
 
 ```sh
-git clone https://github.com/GithubAnant/Ration.git
-cd Ration
+git clone https://github.com/GithubAnant/Allot.git
+cd Allot
 swift test
 ./scripts/build-app.sh
-open dist/Ration.app
+open dist/Allot.app
 ```
 
-Move `dist/Ration.app` to `~/Applications` if you want to keep it installed. Click its menu bar icon to open the panel.
+Move `dist/Allot.app` to `~/Applications` if you want to keep it installed. Click its menu bar icon to open the panel.
 
 The app is ad-hoc signed for local use, **not notarized**. Apple Silicon runtime is tested; Intel is compiled but has not been tested on physical Intel hardware. There is no auto-updater or paid signing requirement for building locally.
 
 ## Connect your tools
 
-Sign in to the **Codex** and **Claude Code** CLIs normally. Ration discovers their default accounts. It also reads enabled provider instances and existing credentials from T3 Code’s default `~/.t3/userdata` directory. Set up custom accounts in T3, then refresh Ration.
+Sign in to the **Codex** and **Claude Code** CLIs normally. Allot discovers their default accounts. It also reads enabled provider instances and existing credentials from T3 Code’s default `~/.t3/userdata` directory. Set up custom accounts in T3, then refresh Allot.
 
 | Provider | Subscription limits | Cost and tokens |
 | --- | --- | --- |
@@ -72,7 +72,7 @@ Gemini CLI, GitHub Copilot, Windsurf, Perplexity and standalone Grok subscriptio
 ## What the numbers mean
 
 - **Cost is an API-equivalent estimate, not your subscription bill.** Prices, aliases, filters and overrides come from T3’s local rate/settings files. Missing rates remain unpriced.
-- Cursor limits refresh live. Cursor **cost/token history** updates when T3 syncs its account-usage cache; Ration does not fetch a new event ledger.
+- Cursor limits refresh live. Cursor **cost/token history** updates when T3 syncs its account-usage cache; Allot does not fetch a new event ledger.
 - Unavailable quota/reset data stays unavailable; it is never presented as a measured zero or an invented reset time.
 - The OpenCode error banner is hidden. Its underlying connection error is still available in diagnostics.
 - Account management remains in the CLI/T3. Refresh-interval settings and notification preferences are outside this minimal Usage-tab port.

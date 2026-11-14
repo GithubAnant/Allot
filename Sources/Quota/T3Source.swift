@@ -110,7 +110,7 @@ struct T3LimitReader: Sendable {
         switch account.provider {
         case .codex:
             guard let binary = account.configuration["binaryPath"].flatMap({ $0.isEmpty ? nil : (Command.executable($0) ?? (FileManager.default.isExecutableFile(atPath: $0) ? $0 : nil)) }) ?? Command.executable("codex") else { throw UsageFailure("Codex is not installed.") }
-            let lines = ["{\"id\":1,\"method\":\"initialize\",\"params\":{\"clientInfo\":{\"name\":\"ration\",\"version\":\"2.0\"}}}", "{\"method\":\"initialized\"}", "{\"id\":2,\"method\":\"account/rateLimits/read\"}"].joined(separator: "\n") + "\n"
+            let lines = ["{\"id\":1,\"method\":\"initialize\",\"params\":{\"clientInfo\":{\"name\":\"allot\",\"version\":\"2.0\"}}}", "{\"method\":\"initialized\"}", "{\"id\":2,\"method\":\"account/rateLimits/read\"}"].joined(separator: "\n") + "\n"
             let data = try await Command.run(binary, ["app-server"], input: lines, environment: account.environment, responseID: 2)
             limits = try Self.codex(data)
         case .claude: limits = try Self.claude(await T3ClaudeProbe.run(account: account))

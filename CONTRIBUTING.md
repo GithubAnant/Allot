@@ -23,11 +23,11 @@ For a PR, describe the user-visible change, how you checked it, and provider/pla
 
 ## Logo assets
 
-The selected Token mark is defined once in `Sources/Quota/RationMark.swift`. The menu bar draws this path as a template image; `scripts/AppIcon.swift` renders the same path into the app icon. To regenerate public PNGs:
+The Allot allocation mark is defined once in `Sources/Quota/AllotMark.swift`. The menu bar draws this path as a template image; `scripts/AppIcon.swift` renders the same path into the app icon. To regenerate public PNGs:
 
 ```sh
-swiftc -O -parse-as-library Sources/Quota/RationMark.swift scripts/AppIcon.swift -o /tmp/ration-render-icon
-/tmp/ration-render-icon /tmp/Ration.iconset docs/branding
+swiftc -O -parse-as-library Sources/Quota/AllotMark.swift scripts/AppIcon.swift -o /tmp/allot-render-icon
+/tmp/allot-render-icon /tmp/Allot.iconset docs/branding
 ```
 
 The regular app build regenerates its icon without changing tracked documentation assets.
