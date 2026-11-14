@@ -23,7 +23,7 @@ For a PR, describe the user-visible change, how you checked it, and provider/pla
 
 ## Logo assets
 
-The Allot allocation mark is defined once in `Sources/Quota/AllotMark.swift`. The menu bar draws this path as a template image; `scripts/AppIcon.swift` renders the same path into the app icon. To regenerate public PNGs:
+The Allot quota-pie mark is defined once in `Sources/Quota/AllotMark.swift`. The menu bar draws this path as a template image; `scripts/AppIcon.swift` renders the same path into the app icon. To regenerate public PNGs:
 
 ```sh
 swiftc -O -parse-as-library Sources/Quota/AllotMark.swift scripts/AppIcon.swift -o /tmp/allot-render-icon

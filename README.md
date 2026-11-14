@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/branding/app-icon.png" width="96" alt="Allot logo">
+<img src="docs/branding/app-icon.png" width="96" alt="Allot quota-pie logo">
 
 # Allot
 

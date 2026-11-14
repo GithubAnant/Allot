@@ -184,13 +184,13 @@ final class T3Tests: XCTestCase {
         XCTAssertEqual(try total(engine), 10, "Repeated summaries must not mutate or double-count cached records")
         XCTAssertEqual(try total(T3Engine()), 0, "History must remain private to its engine")
     }
-    @MainActor func testAllotMarkKeepsItsCounterDotAndMenuBarTemplate() {
+    @MainActor func testAllotPieKeepsItsExplodedQuarterAndMenuBarTemplate() {
         let path = AllotMark.path(in: NSRect(x: 0, y: 0, width: 100, height: 100))
-        XCTAssertTrue(path.contains(NSPoint(x: 10, y: 50)))
-        XCTAssertTrue(path.contains(NSPoint(x: 88, y: 40)))
-        XCTAssertFalse(path.contains(NSPoint(x: 43, y: 40)), "Counter stays transparent")
-        XCTAssertTrue(path.contains(NSPoint(x: 87, y: 91)), "Floating portion remains visible")
-        XCTAssertFalse(path.contains(NSPoint(x: 87, y: 80)), "Dot stays separated from the body")
+        XCTAssertTrue(path.contains(NSPoint(x: 20, y: 40)), "Main quota disk remains filled")
+        XCTAssertTrue(path.contains(NSPoint(x: 60, y: 20)))
+        XCTAssertTrue(path.contains(NSPoint(x: 68, y: 72)), "Detached quarter remains filled")
+        XCTAssertFalse(path.contains(NSPoint(x: 50, y: 50)), "Portions stay separated")
+        XCTAssertFalse(path.contains(NSPoint(x: 58, y: 46)), "Horizontal gap stays open")
         XCTAssertFalse(path.contains(NSPoint(x: -1, y: 50)))
         let menu = AllotMark.menuBarImage()
         XCTAssertTrue(menu.isTemplate)

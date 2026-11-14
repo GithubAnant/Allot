@@ -38,8 +38,6 @@ import AppKit
         let inset = background ? size * 0.24 : 0
         let markBounds = bounds.insetBy(dx: inset, dy: inset)
         AllotMark.path(in: markBounds).fill()
-        AllotMark.accentColor.setFill()
-        AllotMark.accentPath(in: markBounds).fill()
         guard let data = bitmap.representation(using: .png, properties: [:]) else {
             throw NSError(domain: "AllotIcon", code: 3, userInfo: [NSLocalizedDescriptionKey: "Could not encode icon PNG"])
         }
